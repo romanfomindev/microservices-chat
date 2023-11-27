@@ -1,11 +1,7 @@
 package main
 
-import (
-	"fmt"
-
-	"github.com/fatih/color"
-)
+import "github.com/romanfomindev/microservices-chat/cmd/root"
 
 func main() {
-	fmt.Println(color.GreenString("Hello, world!"))
+	root.Execute()
 }
