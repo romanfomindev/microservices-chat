@@ -9,6 +9,7 @@ import (
 
 	"github.com/romanfomindev/microservices-chat/internal/app"
 	"github.com/romanfomindev/microservices-chat/internal/config"
+	"github.com/romanfomindev/microservices-chat/internal/storage"
 	"github.com/spf13/cobra"
 )
 
@@ -75,6 +76,8 @@ var createChatCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("failed to get email: %s\n", err.Error())
 		}
+		storage.SetAccessToken(accessToken)
+
 		nameStr, err := cmd.Flags().GetString("name")
 		if err != nil {
 			log.Fatalf("failed to get name: %s\n", err.Error())
@@ -87,7 +90,7 @@ var createChatCmd = &cobra.Command{
 
 		ctx := context.Background()
 		serviceProvicer := app.NewServiceProvider()
-		chatID, err := serviceProvicer.ChatService().Create(ctx, accessToken, nameStr, usernames)
+		chatID, err := serviceProvicer.ChatService().Create(ctx, nameStr, usernames)
 		if err != nil {
 			log.Fatalf("failed to create chat: %s\n", err.Error())
 		}

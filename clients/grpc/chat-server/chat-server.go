@@ -2,6 +2,8 @@ package chat_server
 
 import (
 	"context"
+	"log"
+
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	chatserverDesc "github.com/romanfomindev/microservices-chat-server/pkg/chat_api_v1"
@@ -20,26 +22,23 @@ func NewChatServer(connection *grpc.ClientConn) clients.ChatServer {
 	}
 }
 
-func (c *ChatServer) Create(ctx context.Context, accessToken, name string, usernames []string) (uint64, error) {
+func (c *ChatServer) Create(ctx context.Context, name string, usernames []string) (uint64, error) {
 	cl := chatserverDesc.NewChatApiClient(c.connection)
-	md := metadata.New(map[string]string{"Authorization": "Bearer " + accessToken})
-	ctx = metadata.NewOutgoingContext(ctx, md)
 
 	r, err := cl.Create(ctx, &chatserverDesc.CreateRequest{
 		ChatName:  name,
 		Usernames: usernames,
 	})
 	if err != nil {
+		log.Printf("ERROR: %s", err.Error())
 		return 0, err
 	}
 
 	return r.GetId(), nil
 }
 
-func (c *ChatServer) Delete(ctx context.Context, accessToken string, id uint64) error {
+func (c *ChatServer) Delete(ctx context.Context, id uint64) error {
 	cl := chatserverDesc.NewChatApiClient(c.connection)
-	md := metadata.New(map[string]string{"Authorization": "Bearer " + accessToken})
-	ctx = metadata.NewOutgoingContext(ctx, md)
 
 	_, err := cl.Delete(ctx, &chatserverDesc.DeleteRequest{
 		Id: id,
@@ -51,15 +50,13 @@ func (c *ChatServer) Delete(ctx context.Context, accessToken string, id uint64) 
 	return nil
 }
 
-func (c *ChatServer) SendMessage(ctx context.Context, accessToken string, chatId uint64, text string) error {
+func (c *ChatServer) SendMessage(ctx context.Context, chatId uint64, text string) error {
 	cl := chatserverDesc.NewChatApiClient(c.connection)
-	md := metadata.New(map[string]string{"Authorization": "Bearer " + accessToken})
-	ctx = metadata.NewOutgoingContext(ctx, md)
 
 	_, err := cl.SendMessage(ctx, &chatserverDesc.SendMessageRequest{
 		ChatId: chatId,
 		Message: &chatserverDesc.Message{
-			Text: text,
+			Text:      text,
 			CreatedAt: timestamppb.Now(),
 		},
 	})
