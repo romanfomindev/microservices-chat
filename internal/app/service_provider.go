@@ -5,9 +5,12 @@ import (
 
 	"github.com/romanfomindev/microservices-chat/internal/config"
 	"github.com/romanfomindev/microservices-chat/internal/config/env"
+	"github.com/romanfomindev/microservices-chat/internal/interceptor"
 	"github.com/romanfomindev/microservices-chat/internal/service"
 	"github.com/romanfomindev/microservices-chat/internal/service/auth"
 	"github.com/romanfomindev/microservices-chat/internal/service/chat"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type serviceProvider struct {
@@ -58,7 +61,16 @@ func (s *serviceProvider) AuthService() service.AuthService {
 
 func (s *serviceProvider) ChatService() service.ChatService {
 	if s.chatsService == nil {
-		chatService := chat.NewChatService(s.ChatServerConfig())
+		conn, err := grpc.Dial(
+			s.ChatServerConfig().Address(),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithUnaryInterceptor(interceptor.AccessClientInterceptor()),
+		)
+		if err != nil {
+			log.Fatalf("failed to create connect: %s", err.Error())
+		}
+
+		chatService := chat.NewChatService(s.ChatServerConfig(), conn)
 		s.chatsService = chatService
 	}
 

@@ -72,7 +72,8 @@ func (s *ChatService) Connect(ctx context.Context, accessToken string, chatId ui
 		}
 
 		text := lines.String()
-		err := client.SendMessage(ctx, accessToken, chatId, text)
+
+		err := client.SendMessage(ctx, chatId, text)
 		if err != nil {
 			log.Println("failed to send message: ", err)
 			return err

@@ -13,8 +13,8 @@ type Auth interface {
 }
 
 type ChatServer interface {
-	Create(ctx context.Context, accessToken, name string, usernames []string) (uint64, error)
-	Delete(ctx context.Context, accessToken string, id uint64) error
-	SendMessage(ctx context.Context, accessToken string, chatId uint64, text string) error
+	Create(ctx context.Context, name string, usernames []string) (uint64, error)
+	Delete(ctx context.Context, id uint64) error
+	SendMessage(ctx context.Context, chatId uint64, text string) error
 	Connect(ctx context.Context, accessToken string, chatId uint64) (chatserverDesc.ChatApi_ConnectChatClient, error)
 }
